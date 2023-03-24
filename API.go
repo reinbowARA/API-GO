@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 func main() {
 	apikey := "Xa0PYkfM35Sz02AFPkjPRXCIDKb2MXJj"
-	apiURL := "https://api.apilayer.com/fixer/timeseries?base=USD&symbols=RUB&start_date=2023-03-01&end_date=2023-03-05"
+
+	var today string
+	today = time.Now().Format("2006-01-02")
+	fmt.Println(today)
+
+	apiURL := fmt.Sprintf("https://api.apilayer.com/fixer/%s?base=USD&symbols=RUB", today)
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {

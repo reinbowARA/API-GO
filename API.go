@@ -54,22 +54,22 @@ func main() {
 
 	currentDUO := strings.Join(pairs[:], ",")
 
-	urlDUO := fmt.Sprintf("https://currate.ru/api/?get=rates&pairs=%s&key=%s", currentDUO, apiKey)
+	url = fmt.Sprintf("https://currate.ru/api/?get=rates&pairs=%s&key=%s", currentDUO, apiKey)
 
-	respDUO, errDUO := http.Get(urlDUO)
-	if errDUO != nil {
-		panic(errDUO)
+	resp, err = http.Get(url)
+	if err != nil {
+		panic(err)
 	}
-	defer respDUO.Body.Close()
+	defer resp.Body.Close()
 
-	bodyDUO, err := ioutil.ReadAll(respDUO.Body)
+	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
 
 	var currencyRange CurrencyRange
 
-	err = json.Unmarshal(bodyDUO, &currencyRange)
+	err = json.Unmarshal(body, &currencyRange)
 	if err != nil {
 		panic(err)
 	}

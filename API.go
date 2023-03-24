@@ -5,12 +5,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type CurrencyListResponse struct {
 	Status  string   `json:"status"`
 	Message string   `json:"message"`
 	Data    []string `json:"data"`
+}
+
+type CurrencyRange struct {
+	Status  int               `json:"status"`
+	Message string            `json:"message"`
+	Data    map[string]string `json:"data"`
 }
 
 func main() {
@@ -37,7 +44,42 @@ func main() {
 		panic(currencyListResponse.Message)
 	}
 
+	var pairs [92]string
+
+	//получаем количество пар
 	for value, pair := range currencyListResponse.Data {
-		fmt.Println(value+1, " = ", string(pair))
+		fmt.Println(value, " = ", string(pair))
+		pairs[value] = string(pair)
+	}
+
+	currentDUO := strings.Join(pairs[:], ",")
+
+	urlDUO := fmt.Sprintf("https://currate.ru/api/?get=rates&pairs=%s&key=%s", currentDUO, apiKey)
+
+	respDUO, errDUO := http.Get(urlDUO)
+	if errDUO != nil {
+		panic(errDUO)
+	}
+	defer respDUO.Body.Close()
+
+	bodyDUO, err := ioutil.ReadAll(respDUO.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	var currencyRange CurrencyRange
+
+	err = json.Unmarshal(bodyDUO, &currencyRange)
+	if err != nil {
+		panic(err)
+	}
+
+	if currencyRange.Status != 200 {
+		panic(currencyListResponse.Message)
+	}
+
+	//получаем количество пар с расценкой на сегодняшний день (по умолчанию берутся последние данные (GMT +03:00))
+	for pair, rate := range currencyRange.Data {
+		fmt.Println(string(pair), "=", string(rate))
 	}
 }

@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -34,22 +33,25 @@ func main() {
 
 	apiKey := key.Key // получаем api из json файла {"key":"token_API"}
 
-	//ticker := time.NewTicker(time.Minute * 10)
+	//ticker := time.NewTicker(time.Minute * 1)
 
-	//for range ticker.C {
-	rate, err := getExchangeRate(apiKey)
-	if err != nil {
-		log.Println(err)
-		//continue
+	for {
+		log.Println("Start iteration")
+		rate, err := getExchangeRate(apiKey)
+		if err != nil {
+			log.Println(err)
+			//continue
+		}
+		fmt.Println(rate)
+		err = saveExchangeRate(rate)
+		if err != nil {
+			log.Println(err)
+			//continue
+		}
+		log.Printf("Exchange rate saved: %f", rate)
+		//time.Sleep(1 * time.Hour)
+		time.Sleep(1 * time.Minute)
 	}
-	fmt.Println(rate)
-	err = saveExchangeRate(rate)
-	if err != nil {
-		log.Println(err)
-		//continue
-	}
-	log.Printf("Exchange rate saved: %f", rate)
-	//}
 }
 
 func getExchangeRate(apiKey string) (float64, error) {
@@ -61,7 +63,7 @@ func getExchangeRate(apiKey string) (float64, error) {
 		Rates Rates `json:"rates"`
 	}
 
-	apiURL := fmt.Sprintf("https://api.apilayer.com/fixer/latest?base=USD&symbols=RUB")
+	apiURL := "https://api.apilayer.com/fixer/latest?base=USD&symbols=RUB"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		panic(err)
@@ -93,7 +95,7 @@ func saveExchangeRate(rate float64) error {
 	}
 	fmt.Println("Подключение с БД установленно!")
 	defer db.Close()
-	stmt, err := db.Prepare("insert into Current.exchange_rates (currency, rate, created_at) values ($1, $2, $3)")
+	stmt, err := db.Prepare("insert into exchange_rates (currency, rate, created_at) values (?, ?, ?)")
 	if err != nil {
 		return err
 	}

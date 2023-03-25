@@ -37,6 +37,10 @@ func main() {
 
 	for {
 		log.Println("Start iteration")
+		if time.Now().Hour() != 0 && time.Now().Minute() != 0 {
+			time.Sleep(1 * time.Second)
+			continue
+		}
 		rate, err := getExchangeRate(apiKey)
 		if err != nil {
 			log.Println(err)
@@ -50,7 +54,8 @@ func main() {
 		}
 		log.Printf("Exchange rate saved: %f", rate)
 		//time.Sleep(1 * time.Hour)
-		time.Sleep(1 * time.Minute)
+		//time.Sleep(1 * time.Minute)
+
 	}
 }
 

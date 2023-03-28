@@ -13,6 +13,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type exchange_rates struct {
+	id         int
+	currency   string
+	rate       float32
+	created_at string
+}
 type APIkey struct {
 	Key string `json:"key"`
 }
@@ -35,28 +41,29 @@ func main() {
 
 	//ticker := time.NewTicker(time.Minute * 1)
 
-	for {
-		log.Println("Start iteration")
-		if time.Now().Hour() != 0 && time.Now().Minute() != 0 {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		rate, err := getExchangeRate(apiKey)
-		if err != nil {
-			log.Println(err)
-			//continue
-		}
-		fmt.Println(rate)
-		err = saveExchangeRate(rate)
-		if err != nil {
-			log.Println(err)
-			//continue
-		}
-		log.Printf("Exchange rate saved: %f", rate)
-		//time.Sleep(1 * time.Hour)
-		//time.Sleep(1 * time.Minute)
-
+	/*for {
+	log.Println("Start iteration")
+	if time.Now().Hour() != 0 && time.Now().Minute() != 0 {
+		time.Sleep(1 * time.Second)
+		continue
+	}*/
+	rate, err := getExchangeRate(apiKey)
+	if err != nil {
+		log.Println(err)
+		//continue
 	}
+	fmt.Println(rate)
+
+	Curr, err := saveExchangeRate(rate)
+	if err != nil {
+		log.Println(err)
+		//continue
+	}
+	log.Printf("Exchange rate saved: %f", rate)
+	for _, Cur := range Curr {
+		fmt.Println(Cur.id, Cur.currency, Cur.rate, Cur.created_at)
+	}
+	//}
 }
 
 func getExchangeRate(apiKey string) (float64, error) {
@@ -93,20 +100,37 @@ func getExchangeRate(apiKey string) (float64, error) {
 	return date.Rates.RUB, err
 }
 
-func saveExchangeRate(rate float64) error {
+func saveExchangeRate(rate float64) ([]exchange_rates, error) {
 	db, err := sql.Open("sqlite3", "Current.db")
 	if err != nil {
-		return err
+		panic(err)
 	}
 	fmt.Println("Подключение с БД установленно!")
 	defer db.Close()
 	stmt, err := db.Prepare("insert into exchange_rates (currency, rate, created_at) values (?, ?, ?)")
 	if err != nil {
-		return err
+		panic(err)
 	}
-	_, err = stmt.Exec("USD", rate, time.Now())
+	_, err = stmt.Exec("USD", rate, time.Now().Format("2006-01-02"))
 	if err != nil {
-		return err
+		panic(err)
 	}
-	return nil
+	rows, err := db.Query("select * from exchange_rates")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	currenct := []exchange_rates{}
+
+	for rows.Next() {
+		Cur := exchange_rates{}
+		err := rows.Scan(&Cur.id, &Cur.currency, &Cur.rate, &Cur.created_at)
+		if err != nil {
+			panic(err)
+			continue
+		}
+		currenct = append(currenct, Cur)
+	}
+	return currenct, nil
 }

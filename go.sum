@@ -1,2 +1,4 @@
 github.com/mattn/go-sqlite3 v1.14.16 h1:yOQRA0RpS5PFz/oikGwBEqvAWhWg5ufRz4ETLjwpU1Y=
 github.com/mattn/go-sqlite3 v1.14.16/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
+github.com/sbinet/go-gnuplot v0.0.0-20130514120836-9167d8eb1ac4 h1:DjPYuV8FWDg57bkdJ2DQUB6PMQJUapXdJ1uCvPC7XT0=
+github.com/sbinet/go-gnuplot v0.0.0-20130514120836-9167d8eb1ac4/go.mod h1:cBjaN6xLFdcYFeCkvNXnUCPPeHA23BR6Yg6liSwsLjE=

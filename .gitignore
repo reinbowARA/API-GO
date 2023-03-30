@@ -15,3 +15,5 @@
 # vendor/
 apikey.json
 /test/*
+
+.vscode

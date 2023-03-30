@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"time"
@@ -24,7 +27,8 @@ type exchange_rates struct {
 	created_at time.Time
 }
 type APIkey struct {
-	Key string `json:"key"`
+	Key    string `json:"key"`
+	Keyimg string `json:"keyimg"`
 }
 
 func main() {
@@ -42,6 +46,7 @@ func main() {
 	}
 
 	apiKey := key.Key // получаем api из json файла {"key":"token_API"}
+	apikeyimg := key.Keyimg
 
 	var TimeWait int
 
@@ -54,7 +59,7 @@ func main() {
 	fmt.Printf("Please wait %d min \n", TimeWait)
 
 	for {
-		if time.Now().Minute() == 0 || time.Now().Minute() == 30 && time.Now().Second() == 0 {
+		if time.Now().Minute()%30 == 0 && time.Now().Second() == 0 {
 			log.Println("Start read API")
 
 			rate, err := getExchangeRate(apiKey)
@@ -70,7 +75,9 @@ func main() {
 			}
 			log.Printf("Exchange rate saved: %f", rate)
 			GetPngGraph(Curr)
+			UploadImg(apikeyimg)
 			log.Println("stand 30 minutes")
+			time.Sleep(1 * time.Second) // кастыль, инача 2 раза подряд считывает цикл
 		}
 
 	}
@@ -201,4 +208,46 @@ func GetPngGraph(currents []exchange_rates) {
 	if err := p.Save(10*vg.Inch, 10*vg.Inch, "src/usd_to_rub.png"); err != nil {
 		panic(err)
 	}
+}
+
+func UploadImg(APIkey string) {
+	// открываем файл с изображением
+	file, err := os.Open("src/usd_to_rub.png")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	// создаем новый буфер для формы
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// добавляем файл в форму
+	part, err := writer.CreateFormFile("image", "usd_to_rub.png")
+	if err != nil {
+		panic(err)
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		panic(err)
+	}
+	// закрываем форму
+	writer.Close()
+
+	// создаем новый POST-запрос на API imgbb.com
+	url := fmt.Sprintf("https://api.imgbb.com/1/upload?&key=%s", APIkey)
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// отправляем запрос и получаем ответ
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
 }

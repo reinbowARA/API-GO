@@ -59,13 +59,13 @@ func main() {
 	fmt.Printf("Please wait %d min \n", TimeWait)
 
 	for {
-		if time.Now().Minute()%30 == 0 && time.Now().Second() == 0 {
+		if time.Now().Minute()%10 == 0 && time.Now().Second() == 0 {
 			log.Println("Start read API")
-
+		rep:
 			rate, err := getExchangeRate(apiKey)
 			if err != nil {
 				log.Println(err)
-				continue
+				goto rep
 			}
 			log.Println("API read successfully")
 			Curr, err := saveExchangeRate(rate)
@@ -77,7 +77,7 @@ func main() {
 			GetPngGraph(Curr)
 			UploadImg(apikeyimg)
 			log.Println("stand 30 minutes")
-			time.Sleep(1 * time.Second) // кастыль, инача 2 раза подряд считывает цикл
+			time.Sleep(5 * time.Minute) // кастыль, инача 2 раза подряд считывает цикл
 		}
 
 	}

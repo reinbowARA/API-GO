@@ -96,7 +96,7 @@ CREATE TABLE exchange_rates(id INTEGER PRIMARY KEY, currency TEXT, rate DECIMAL,
 перед использованием программы надо скачать утилиту `gnuplot`, ибо на основе этой утилиты и рисуются графики
 
 пример графика:
-![graph](src/usd_to_rub.png)
+![graph](srctest/usd_to_rub.png)
 
 ## Отправка графиков на imgBB
 

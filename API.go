@@ -76,6 +76,10 @@ func main() {
 				log.Println(err)
 				goto rep
 			}
+			if rate == 0 {
+				log.Println("Всё, кина не будет, запросы кончились")
+				break
+			}
 			log.Println("API read successfully")
 			Curr, err := saveExchangeRate(rate)
 			if err != nil {

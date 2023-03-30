@@ -49,19 +49,28 @@ func main() {
 	apikeyimg := key.Keyimg
 
 	var TimeWait int
-
-	if time.Now().Minute() > 30 {
-		TimeWait = int(60.0 - float64(time.Now().Minute()))
+	x := float64(time.Now().Minute())
+	if time.Now().Minute() > 10 {
+		if time.Now().Minute() < 20 {
+			TimeWait = int(20.0 - x)
+		} else if time.Now().Minute() < 30 {
+			TimeWait = int(30.0 - x)
+		} else if time.Now().Minute() < 40 {
+			TimeWait = int(40.0 - x)
+		} else if time.Now().Minute() < 50 {
+			TimeWait = int(50.0 - x)
+		}
 	} else {
-		TimeWait = int(30.0 - float64(time.Now().Minute()))
+		TimeWait = int(10.0 - x)
 	}
 	fmt.Println("Start program!")
 	fmt.Printf("Please wait %d min \n", TimeWait)
 
 	for {
 		if time.Now().Minute()%10 == 0 && time.Now().Second() == 0 {
+		rep: // иначе будет большой разрыф в графике
 			log.Println("Start read API")
-		rep:
+
 			rate, err := getExchangeRate(apiKey)
 			if err != nil {
 				log.Println(err)
@@ -76,7 +85,7 @@ func main() {
 			log.Printf("Exchange rate saved: %f", rate)
 			GetPngGraph(Curr)
 			UploadImg(apikeyimg)
-			log.Printf("stand %d minutes \n", TimeWait)
+			log.Println("stand 10 minutes")
 			time.Sleep(5 * time.Minute) // кастыль, инача 2 раза подряд считывает цикл
 		}
 

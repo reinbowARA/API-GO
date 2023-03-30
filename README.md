@@ -103,3 +103,5 @@ CREATE TABLE exchange_rates(id INTEGER PRIMARY KEY, currency TEXT, rate DECIMAL,
 Для работы с данным [ресурсом](https://api.imgbb.com/) надо зарегистрироваться и получить API ключ. 
 
 Картинку надо преобразовать в бинарный файл и запихнуть в форму запроса, а сам запрос мы открываем через метод `POST`.
+
+мои графики в [imgBB](https://redara.imgbb.com/)

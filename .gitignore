@@ -17,3 +17,4 @@ apikey.json
 /test/*
 
 .vscode
+/src/*

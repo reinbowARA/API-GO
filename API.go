@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"time"
@@ -44,8 +43,15 @@ func main() {
 
 	apiKey := key.Key // получаем api из json файла {"key":"token_API"}
 
+	var TimeWait int
+
+	if time.Now().Minute() > 30 {
+		TimeWait = int(60.0 - float64(time.Now().Minute()))
+	} else {
+		TimeWait = int(30.0 - float64(time.Now().Minute()))
+	}
 	fmt.Println("Start program!")
-	fmt.Printf("Please wait %d min \n", int(math.Abs(30.0-float64(time.Now().Minute()))))
+	fmt.Printf("Please wait %d min \n", TimeWait)
 
 	for {
 		if time.Now().Minute() == 0 || time.Now().Minute() == 30 && time.Now().Second() == 0 {
@@ -137,6 +143,7 @@ func saveExchangeRate(rate float64) ([]exchange_rates, error) {
 	}
 	return currenct, nil
 }
+
 func GetPngGraph(currents []exchange_rates) {
 	// Создание нового графика
 	p := plot.New()

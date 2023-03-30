@@ -76,7 +76,7 @@ func main() {
 			log.Printf("Exchange rate saved: %f", rate)
 			GetPngGraph(Curr)
 			UploadImg(apikeyimg)
-			log.Println("stand 30 minutes")
+			log.Printf("stand %d minutes \n", TimeWait)
 			time.Sleep(5 * time.Minute) // кастыль, инача 2 раза подряд считывает цикл
 		}
 

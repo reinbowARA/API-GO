@@ -34,7 +34,7 @@ type APIkey struct {
 func main() {
 	file, err := os.Open("apikey.json")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer file.Close()
 
@@ -42,7 +42,7 @@ func main() {
 	Key := json.NewDecoder(file)
 	err = Key.Decode(&key)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	apiKey := key.Key // получаем api из json файла {"key":"token_API"}
@@ -87,8 +87,14 @@ func main() {
 				continue
 			}
 			log.Printf("Exchange rate saved: %f", rate)
-			GetPngGraph(Curr)
-			UploadImg(apikeyimg)
+			err = GetPngGraph(Curr)
+			if err != nil {
+				log.Println(err)
+			}
+			err = UploadImg(apikeyimg)
+			if err != nil {
+				log.Println(err)
+			}
 			log.Println("stand 10 minutes")
 			time.Sleep(5 * time.Minute) // кастыль, инача 2 раза подряд считывает цикл
 		}
@@ -108,7 +114,7 @@ func getExchangeRate(apiKey string) (float64, error) {
 	apiURL := "https://api.apilayer.com/fixer/latest?base=USD&symbols=RUB"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	req.Header.Set("apikey", apiKey)
@@ -116,13 +122,13 @@ func getExchangeRate(apiKey string) (float64, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	var date Response
@@ -133,21 +139,21 @@ func getExchangeRate(apiKey string) (float64, error) {
 func saveExchangeRate(rate float64) ([]exchange_rates, error) {
 	db, err := sql.Open("sqlite3", "Current.db")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	log.Println("Подключение с БД установленно!")
 	defer db.Close()
 	stmt, err := db.Prepare("insert into exchange_rates (currency, rate, created_at) values (?, ?, ?)")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	_, err = stmt.Exec("USD", rate, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	rows, err := db.Query("select * from exchange_rates")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer rows.Close()
 
@@ -157,14 +163,14 @@ func saveExchangeRate(rate float64) ([]exchange_rates, error) {
 		Cur := exchange_rates{}
 		err := rows.Scan(&Cur.id, &Cur.currency, &Cur.rate, &Cur.created_at)
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 		currenct = append(currenct, Cur)
 	}
 	return currenct, nil
 }
 
-func GetPngGraph(currents []exchange_rates) {
+func GetPngGraph(currents []exchange_rates) error {
 	// Создание нового графика
 	p := plot.New()
 
@@ -200,7 +206,7 @@ func GetPngGraph(currents []exchange_rates) {
 	// Создание линии для графика
 	line, err := plotter.NewLine(pts)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	// Добавление линии на график
@@ -208,7 +214,7 @@ func GetPngGraph(currents []exchange_rates) {
 
 	point, err := plotter.NewScatter(pts)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	// устанавливаем точки на красный цвет
 	point.GlyphStyle.Color = plotutil.Color(0)
@@ -219,15 +225,16 @@ func GetPngGraph(currents []exchange_rates) {
 
 	// Сохранение графика в файл
 	if err := p.Save(10*vg.Inch, 10*vg.Inch, "src/usd_to_rub.png"); err != nil {
-		panic(err)
+		log.Println(err)
 	}
+	return err
 }
 
-func UploadImg(APIkey string) {
+func UploadImg(APIkey string) error {
 	// открываем файл с изображением
 	file, err := os.Open("src/usd_to_rub.png")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer file.Close()
 
@@ -238,11 +245,11 @@ func UploadImg(APIkey string) {
 	// добавляем файл в форму
 	part, err := writer.CreateFormFile("image", "usd_to_rub.png")
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	_, err = io.Copy(part, file)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	// закрываем форму
 	writer.Close()
@@ -251,7 +258,7 @@ func UploadImg(APIkey string) {
 	url := fmt.Sprintf("https://api.imgbb.com/1/upload?&key=%s", APIkey)
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
@@ -259,8 +266,8 @@ func UploadImg(APIkey string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer resp.Body.Close()
-
+	return err
 }

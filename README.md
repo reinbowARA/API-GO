@@ -100,7 +100,7 @@ CREATE TABLE exchange_rates(
 
 пример графика:
 
-<center><img src="srctest/usd_to_rub.png" alt="drawing" width="500"/></center>
+<p align="center"><img src="srctest/usd_to_rub.png" alt="drawing" width="500"/></p>
 
 ## Отправка графиков на imgBB
 

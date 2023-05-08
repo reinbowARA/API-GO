@@ -99,8 +99,9 @@ CREATE TABLE exchange_rates(
 Перед использованием программы надо скачать утилиту `gnuplot`, ибо на основе этой утилиты и рисуются графики.
 
 пример графика:
-
-<p align="center"><img src="srctest/usd_to_rub.png" alt="drawing" width="500"/></p>
+<p align="center">
+<img src="srctest/usd_to_rub.png" alt="drawing" width="500" /> 
+</p>
 
 ## Отправка графиков на imgBB
 
